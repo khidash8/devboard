@@ -1,26 +1,44 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  /* Color — named for their JOB, not borrowed from a generic numbered scale */
+  --color-paper: #FAFAF8;
+  --color-ink: #1C2321;
+  --color-accent: #2F6F5E;
+  --color-accent-muted: #E4EEEB;
+  --color-muted: #8A8F87;
+  --color-attention: #B3452C;
+  --color-attention-muted: #F5E4DF;
+  --color-border: #E4E2DB;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Type */
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+
+  /* A tighter type scale than Tailwind's default — DevBoard is a dense, daily-use tool, not a marketing page */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+:root {
+  --primary: var(--color-accent);
+  --primary-foreground: var(--color-paper);
+  --muted: var(--color-accent-muted);
+  --muted-foreground: var(--color-muted);
+  --destructive: var(--color-attention);
+  --destructive-foreground: var(--color-paper);
+  --border: var(--color-border);
+  --radius: 0.375rem;
 }

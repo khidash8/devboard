@@ -3,6 +3,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
+@source inline("bg-paper bg-ink bg-accent bg-accent-muted bg-muted bg-attention bg-attention-muted bg-border");
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {

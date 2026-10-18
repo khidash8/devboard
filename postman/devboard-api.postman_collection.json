@@ -1,0 +1,210 @@
+{
+    "info": {
+        "_postman_id": "989bdbfc-17c0-4011-a9a4-4e6446a14346",
+        "name": "DevBoard API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "31552277"
+    },
+    "item": [
+        {
+            "name": "Projects",
+            "item": [
+                {
+                    "name": "Create Project",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "const response = pm.response.json();\r\npm.environment.set('project_id', response.id);\r\n\r\npm.test('responds with 201 Created', () => {\r\n  pm.response.to.have.status(201);\r\n});\r\n\r\npm.test('the created project has the correct name', () => {\r\n  const body = pm.response.json();\r\n  pm.expect(body.name).to.eql('Test Project');\r\n  pm.expect(body.id).to.be.a('string');\r\n});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"name\": \"Test Project\", \"slug\": \"test-project\" }",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/projects",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "projects"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Projects",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('responds with 200', () => {\r\n  pm.response.to.have.status(200);\r\n});\r\n\r\npm.test('response is an array', () => {\r\n  pm.expect(pm.response.json()).to.be.an('array');\r\n});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/projects",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "projects"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Project",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('responds with 200', () => {\r\n  pm.response.to.have.status(200);\r\n});\r\n\r\npm.test('the patched project has the correct name', () => {\r\n  const body = pm.response.json();\r\n  pm.expect(body.name).to.eql('Updated Name');\r\n  pm.expect(body.id).to.be.a('string');\r\n});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PATCH",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{ \"name\": \"Updated Name\" }",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/projects/{{project_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "projects",
+                                "{{project_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Project",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('responds with 204 No Content', () => {\r\n  pm.response.to.have.status(204);\r\n});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/projects/{{project_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "projects",
+                                "{{project_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Project",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('a deleted project is genuinely gone, not just hidden', () => {\r\n  // Run this specifically AFTER Delete Project has executed once —\r\n  // the Collection Runner (Section 7) is what makes this ordering reliable\r\n  pm.response.to.have.status(404);\r\n});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/projects/{{project_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "projects",
+                                "{{project_id}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Sign In",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\r\n  \"email\": \"you@example.com\",\r\n  \"password\": \"demoUser@123\"\r\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/auth/sign-in/email",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "auth",
+                        "sign-in",
+                        "email"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ]
+}

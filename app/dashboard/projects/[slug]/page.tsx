@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import { db } from '@/lib/db';
 import { TaskFilters } from './task-filters';
 import { TaskRow } from './task-row';
+import { NewTaskForm } from './new-task-form';
 
 export const instant = false;
 
@@ -41,6 +42,7 @@ export default async function ProjectTasksPage({
     return (
         <main className="p-8 space-y-6">
             <h1 className="text-xl font-semibold">{project.name}</h1>
+            <NewTaskForm projectId={project.id} />
             <TaskFilters />
             <div className="divide-y divide-border border border-border rounded">
                 {tasks.length === 0 ? (

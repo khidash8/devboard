@@ -5,6 +5,8 @@ import { db } from '@/lib/db';
 import { TaskFilters } from './task-filters';
 import { TaskRow } from './task-row';
 
+export const instant = false;
+
 export default async function ProjectTasksPage({
     params,
     searchParams,
@@ -18,7 +20,12 @@ export default async function ProjectTasksPage({
     const { slug } = await params;
     const { status, priority, q } = await searchParams;
 
-    const project = await db.project.findFirst({ where: { slug, userId: session.user.id } });
+    const project = await db.project.findFirst({
+        where: {
+            userId: session.user.id,
+            OR: [{ slug }, { id: slug }],
+        },
+    });
     if (!project) notFound();
 
     const tasks = await db.task.findMany({

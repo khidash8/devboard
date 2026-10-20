@@ -33,3 +33,27 @@ export async function createTask(projectId: string, rawData: TaskFormValues) {
     revalidatePath(`/dashboard/projects/${project.slug}`);
     return { success: true as const };
 }
+
+export async function toggleTaskStatus(taskId: string, newStatus: string) {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) throw new Error('Unauthorized');
+
+    const task = await db.task.findFirst({
+        where: { id: taskId, project: { userId: session.user.id } },
+        include: { project: true },
+    });
+    if (!task) throw new Error('Task not found');
+
+    const updated = await db.task.update({ where: { id: taskId }, data: { status: newStatus } });
+    revalidatePath(`/dashboard/projects/${task.project.slug}`);
+    return updated;
+}
+
+export async function getOpenTaskCount(projectId: string) {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) throw new Error('Unauthorized');
+
+    return db.task.count({
+        where: { projectId, project: { userId: session.user.id }, status: { not: 'done' } },
+    });
+}

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 import { db } from '@/lib/db';
 import Link from 'next/link';
+import { OpenTaskBadge } from './project-sidebar';
 
 export const instant = false;
 
@@ -33,7 +34,10 @@ export default async function DashboardPage() {
                                 href={`/dashboard/projects/${project.slug}`}
                                 className="block p-4 rounded border border-border bg-paper hover:border-ink transition-colors"
                             >
-                                <p className="font-medium text-base">{project.name}</p>
+                                <div className="flex justify-between items-center">
+                                    <p className="font-medium text-base">{project.name}</p>
+                                    <OpenTaskBadge projectId={project.id} />
+                                </div>
                                 <p className="font-mono text-xs mt-1">{project.slug}</p>
                             </Link>
                         ))}

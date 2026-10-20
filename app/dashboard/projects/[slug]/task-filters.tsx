@@ -1,17 +1,30 @@
 'use client';
-import { useQueryState, parseAsStringEnum } from 'nuqs';
+import { useTransition } from 'react';
+import { useQueryState, parseAsStringEnum, parseAsString, debounce } from 'nuqs';
 import { Input } from '@/components/ui/input';
+import { Loader2 } from 'lucide-react';
 
 export function TaskFilters() {
+    const [isPending, startTransition] = useTransition();
+
     const [status, setStatus] = useQueryState(
         'status',
-        parseAsStringEnum(['all', 'todo', 'in_progress', 'done']).withDefault('all')
+        parseAsStringEnum(['all', 'todo', 'in_progress', 'done'])
+            .withDefault('all')
+            .withOptions({ shallow: false, startTransition })
     );
     const [priority, setPriority] = useQueryState(
         'priority',
-        parseAsStringEnum(['all', 'low', 'medium', 'high']).withDefault('all')
+        parseAsStringEnum(['all', 'low', 'medium', 'high'])
+            .withDefault('all')
+            .withOptions({ shallow: false, startTransition })
     );
-    const [search, setSearch] = useQueryState('q', { defaultValue: '', throttleMs: 300 });
+    const [search, setSearch] = useQueryState(
+        'q',
+        parseAsString
+            .withDefault('')
+            .withOptions({ shallow: false, startTransition, limitUrlUpdates: debounce(300) })
+    );
 
     return (
         <div className="flex gap-3 items-center">
@@ -43,6 +56,10 @@ export function TaskFilters() {
                 onChange={(e) => setSearch(e.target.value)}
                 className="max-w-xs"
             />
+
+            {isPending && (
+                <Loader2 className="h-4 w-4 animate-spin" aria-label="Loading..." />
+            )}
         </div>
     );
 }

@@ -5,6 +5,7 @@ import { db } from '@/lib/db';
 import { TaskFilters } from './task-filters';
 import { TaskRow } from './task-row';
 import { NewTaskForm } from './new-task-form';
+import { OpenTaskBadge } from '../../project-sidebar';
 
 export const instant = false;
 
@@ -41,7 +42,10 @@ export default async function ProjectTasksPage({
 
     return (
         <main className="p-8 space-y-6">
-            <h1 className="text-xl font-semibold">{project.name}</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-xl font-semibold">{project.name}</h1>
+                <OpenTaskBadge projectId={project.id} />
+            </div>
             <NewTaskForm projectId={project.id} />
             <TaskFilters />
             <div className="divide-y divide-border border border-border rounded">

@@ -1,11 +1,13 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 export default function SignInPage() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -14,7 +16,7 @@ export default function SignInPage() {
         e.preventDefault();
         const { error } = await authClient.signIn.email({ email, password });
         if (error) setError(error.message ?? 'Sign-in failed');
-        else window.location.href = '/dashboard';
+        else router.push('/dashboard');
     }
 
     return (

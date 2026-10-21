@@ -13,9 +13,18 @@ export async function GET(request: NextRequest) {
 
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
+    const { searchParams } = new URL(request.url)
+    const q = searchParams.get('q')
+
     const projects = await db.project.findMany({
         where: {
-            userId: session.user.id
+            userId: session.user.id,
+            ...(q ? {
+                OR: [
+                    { name: { contains: q, mode: 'insensitive' } },
+                    { slug: { contains: q, mode: 'insensitive' } },
+                ]
+            } : {})
         },
         orderBy: { createdAt: "desc" }
     })

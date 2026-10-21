@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { plexSans, plexMono } from './fonts';
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
-import { Providers } from './providers';
 import './globals.css';
+
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { CommandPaletteKeyboardListener, Providers } from './providers';
+import { CommandPalette } from '@/components/command-palette';
 
 export const metadata: Metadata = { title: 'DevBoard', description: 'A calm, fast task tracker.' };
 
@@ -11,7 +13,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${plexSans.variable} ${plexMono.variable}`}>
       <body className="font-sans">
         <NuqsAdapter>
-          <Providers>{children}</Providers>
+          <Providers>
+            <CommandPaletteKeyboardListener />
+            <CommandPalette />
+            {children}
+          </Providers>
         </NuqsAdapter>
       </body>
     </html>

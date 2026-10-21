@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/theme-toggle';
+import Link from 'next/link';
 
 const PALETTE_TOKENS = [
   { name: 'paper', bgClass: 'bg-paper' },
@@ -35,8 +36,8 @@ export default function CheckpointPage() {
       </section>
 
       <div className="flex gap-3">
-        <Button>A real, retheme&apos;d shadcn button</Button>
-        <Button variant="outline">Outline button</Button>
+        <Link href={'/dashboard'}><Button>Dashboard</Button></Link>
+        <Link href={'/dashboard/projects'}><Button variant="outline">Projetcs</Button></Link>
       </div>
     </main>
   );

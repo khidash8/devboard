@@ -9,6 +9,7 @@ import { OpenTaskBadge } from '../project-sidebar';
 import { NewProjectDialog } from '@/components/new-project-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { CommandTrigger } from '@/components/command-trigger';
+import { UpgradeButton } from '../billing/upgrade-button';
 
 export const instant = false;
 
@@ -37,6 +38,8 @@ export default async function ProjectsIndexPage() {
                     <CommandTrigger />
                     {/* <ThemeToggle /> */}
                 </div>
+
+                <UpgradeButton />
             </div>
 
             {/* Page Header */}

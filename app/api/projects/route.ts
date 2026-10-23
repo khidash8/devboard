@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { projectSchema } from "@/lib/schemas/project";
+import { canCreateProject } from "@/lib/limits";
 
 export async function GET(request: NextRequest) {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -51,6 +52,10 @@ export async function POST(request: NextRequest) {
             { error: `A project with the slug "${result.data.slug}" already exists` },
             { status: 409 }
         );
+    }
+
+    if (!(await canCreateProject(session.user.id))) {
+        return NextResponse.json({ error: 'Free plan limit reached — upgrade to Pro for unlimited projects' }, { status: 403 });
     }
 
     const project = await db.project.create({

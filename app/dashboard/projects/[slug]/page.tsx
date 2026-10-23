@@ -57,7 +57,7 @@ export default async function ProjectTasksPage({
                         Projects
                     </Link>
                     <span>/</span>
-                    <span className="text-ink font-mono font-medium truncate max-w-[200px]">
+                    <span className="text-ink font-mono font-medium truncate max-w-50">
                         {project.slug}
                     </span>
                 </div>

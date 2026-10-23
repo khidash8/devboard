@@ -18,7 +18,7 @@ export default function CheckpointPage() {
     <main className="min-h-screen p-8 space-y-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between border-b border-border pb-4">
         <h1 className="text-xl font-semibold">DevBoard — Design System Checkpoint</h1>
-        <ThemeToggle />
+        {/* <ThemeToggle /> */}
       </div>
 
       <section className="flex flex-wrap gap-4">
@@ -37,7 +37,7 @@ export default function CheckpointPage() {
 
       <div className="flex gap-3">
         <Link href={'/dashboard'}><Button>Dashboard</Button></Link>
-        <Link href={'/dashboard/projects'}><Button variant="outline">Projetcs</Button></Link>
+        <Link href={'/dashboard/projects'}><Button variant="outline">Projects</Button></Link>
       </div>
     </main>
   );

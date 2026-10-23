@@ -7,6 +7,10 @@ import { TaskRow } from './task-row';
 import { NewTaskForm } from './new-task-form';
 import { OpenTaskBadge } from '../../project-sidebar';
 
+import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme-toggle';
+import { CommandTrigger } from '@/components/command-trigger';
+
 export const instant = false;
 
 export default async function ProjectTasksPage({
@@ -41,9 +45,33 @@ export default async function ProjectTasksPage({
     });
 
     return (
-        <main className="p-8 space-y-6">
+        <main className="max-w-4xl mx-auto p-8 space-y-6">
+            {/* Navigation / Breadcrumb Bar */}
+            <div className="flex items-center justify-between border-b border-border pb-4">
+                <div className="flex items-center gap-2 text-xs text-muted">
+                    <Link href="/dashboard" className="hover:text-ink transition-colors">
+                        Dashboard
+                    </Link>
+                    <span>/</span>
+                    <Link href="/dashboard/projects" className="hover:text-ink transition-colors">
+                        Projects
+                    </Link>
+                    <span>/</span>
+                    <span className="text-ink font-mono font-medium truncate max-w-[200px]">
+                        {project.slug}
+                    </span>
+                </div>
+                <div className="flex items-center gap-3">
+                    <CommandTrigger />
+                    {/* <ThemeToggle /> */}
+                </div>
+            </div>
+
             <div className="flex items-center justify-between">
-                <h1 className="text-xl font-semibold">{project.name}</h1>
+                <div>
+                    <h1 className="text-xl font-semibold">{project.name}</h1>
+                    <p className="font-mono text-xs text-muted mt-0.5">/dashboard/projects/{project.slug}</p>
+                </div>
                 <OpenTaskBadge projectId={project.id} />
             </div>
             <NewTaskForm projectId={project.id} />

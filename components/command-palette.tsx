@@ -53,6 +53,28 @@ export function CommandPalette() {
                     <div className="py-6 text-center text-sm text-muted">Loading projects…</div>
                 )}
                 <CommandEmpty>No projects found.</CommandEmpty>
+                <CommandGroup heading="Navigation">
+                    <CommandItem
+                        value="Dashboard"
+                        onSelect={() => {
+                            close();
+                            router.push('/dashboard');
+                        }}
+                    >
+                        <span>Dashboard</span>
+                        <span className="font-mono text-xs text-muted ml-auto">/dashboard</span>
+                    </CommandItem>
+                    <CommandItem
+                        value="All Projects"
+                        onSelect={() => {
+                            close();
+                            router.push('/dashboard/projects');
+                        }}
+                    >
+                        <span>All Projects</span>
+                        <span className="font-mono text-xs text-muted ml-auto">/dashboard/projects</span>
+                    </CommandItem>
+                </CommandGroup>
                 {recentProjects.length > 0 && (
                     <CommandGroup heading="Recent">
                         {recentProjects.map((project) => (

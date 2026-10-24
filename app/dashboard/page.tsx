@@ -2,8 +2,10 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { Sparkles, CreditCard } from 'lucide-react';
 
 import { db } from '@/lib/db';
+import { getSubscriptionUsage } from '@/lib/limits';
 import { OpenTaskBadge } from './project-sidebar';
 import { NewProjectDialog } from '@/components/new-project-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -16,10 +18,13 @@ export default async function DashboardPage() {
 
     if (!session) redirect('/sign-in');
 
-    const projects = await db.project.findMany({
-        where: { userId: session.user.id },
-        orderBy: { createdAt: 'desc' },
-    });
+    const [projects, usage] = await Promise.all([
+        db.project.findMany({
+            where: { userId: session.user.id },
+            orderBy: { createdAt: 'desc' },
+        }),
+        getSubscriptionUsage(session.user.id),
+    ]);
 
     return (
         <main className="max-w-6xl mx-auto p-8 space-y-8">
@@ -27,6 +32,34 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between border-b border-border pb-4">
                 <span className="font-semibold text-sm tracking-wide uppercase">DevBoard</span>
                 <div className="flex items-center gap-3">
+                    <Link
+                        href="/dashboard/billing"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded border border-border bg-paper hover:bg-muted/50 transition-colors"
+                        title="Manage subscription and billing"
+                    >
+                        {usage.isPro ? (
+                            <>
+                                <Sparkles className="size-3 text-accent" />
+                                <span className="font-medium text-accent-foreground">Pro Plan</span>
+                            </>
+                        ) : (
+                            <>
+                                <CreditCard className="size-3 text-muted-foreground" />
+                                <span className="font-mono text-muted-foreground">
+                                    {usage.projectCount}/3 projects
+                                </span>
+                                {usage.canCreateMore ? (
+                                    <span className="text-accent text-[11px] font-mono">
+                                        ({usage.projectsRemaining} left)
+                                    </span>
+                                ) : (
+                                    <span className="text-attention text-[11px]">
+                                        (Limit reached)
+                                    </span>
+                                )}
+                            </>
+                        )}
+                    </Link>
                     <CommandTrigger />
                     {/* <ThemeToggle /> */}
                 </div>
@@ -49,13 +82,23 @@ export default async function DashboardPage() {
                             View all ({projects.length})
                         </Link>
                     </div>
-                    <NewProjectDialog triggerText="New Project" />
+                    <NewProjectDialog
+                        triggerText="New Project"
+                        canCreateMore={usage.canCreateMore}
+                        projectsRemaining={usage.projectsRemaining}
+                        isPro={usage.isPro}
+                    />
                 </div>
 
                 {projects.length === 0 ? (
                     <div className="flex flex-col items-center justify-center p-12 text-center rounded border border-dashed border-border bg-paper space-y-4">
                         <p className="text-sm text-muted">No projects found. Create your first project to get started.</p>
-                        <NewProjectDialog triggerText="Create Project" />
+                        <NewProjectDialog
+                            triggerText="Create Project"
+                            canCreateMore={usage.canCreateMore}
+                            projectsRemaining={usage.projectsRemaining}
+                            isPro={usage.isPro}
+                        />
                     </div>
                 ) : (
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

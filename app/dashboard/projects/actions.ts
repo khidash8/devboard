@@ -6,6 +6,7 @@ import { headers } from 'next/headers';
 import { db } from '@/lib/db';
 import { projectSchema, type ProjectFormValues } from '@/lib/schemas/project';
 import { revalidatePath } from 'next/cache';
+import { canCreateProject, FREE_PLAN_PROJECT_LIMIT } from '@/lib/limits';
 
 export async function createProject(rawData: ProjectFormValues) {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -29,6 +30,13 @@ export async function createProject(rawData: ProjectFormValues) {
         return {
             success: false as const,
             error: `A project with the slug "${result.data.slug}" already exists. Please choose a different slug.`,
+        };
+    }
+
+    if (!(await canCreateProject(session.user.id))) {
+        return {
+            success: false as const,
+            error: `Free plan limit reached (${FREE_PLAN_PROJECT_LIMIT} projects). Upgrade to Pro for unlimited projects.`,
         };
     }
 

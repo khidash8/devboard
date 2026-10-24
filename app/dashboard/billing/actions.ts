@@ -6,6 +6,7 @@ import { razorpay } from '@/lib/razorpay';
 import { env } from '@/lib/env';
 import crypto from 'node:crypto';
 import { db } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
 
 export async function createProSubscription() {
     const session = await auth.api.getSession({ headers: await headers() });
@@ -40,4 +41,40 @@ export async function verifyPayment(data: { paymentId: string; subscriptionId: s
     // Signature is valid — this confirms the CHECKOUT succeeded, but the webhook (Section 7) remains
     // the authoritative source of truth for actually updating subscription status; see Section 8
     return { verified: true };
+}
+
+export async function cancelSubscription() {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) throw new Error('Unauthorized');
+
+    const subscription = await db.subscription.findUnique({
+        where: { userId: session.user.id },
+    });
+
+    if (!subscription || subscription.plan !== 'pro' || subscription.status !== 'active') {
+        throw new Error('No active Pro subscription found to cancel');
+    }
+
+    if (subscription.razorpaySubId) {
+        try {
+            await razorpay.subscriptions.cancel(subscription.razorpaySubId);
+        } catch (error) {
+            console.error('Razorpay subscription cancellation failed:', error);
+            // Continue updating local status even if external API call fails
+        }
+    }
+
+    await db.subscription.update({
+        where: { userId: session.user.id },
+        data: {
+            status: 'canceled',
+            plan: 'free',
+        },
+    });
+
+    revalidatePath('/dashboard');
+    revalidatePath('/dashboard/projects');
+    revalidatePath('/dashboard/billing');
+
+    return { success: true };
 }

@@ -2,9 +2,10 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { FolderKanban, ArrowLeft, ArrowUpRight } from 'lucide-react';
+import { FolderKanban, ArrowLeft, ArrowUpRight, Sparkles, CreditCard } from 'lucide-react';
 
 import { db } from '@/lib/db';
+import { getSubscriptionUsage } from '@/lib/limits';
 import { OpenTaskBadge } from '../project-sidebar';
 import { NewProjectDialog } from '@/components/new-project-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -18,39 +19,94 @@ export default async function ProjectsIndexPage() {
 
     if (!session) redirect('/sign-in');
 
-    const projects = await db.project.findMany({
-        where: { userId: session.user.id },
-        orderBy: { createdAt: 'desc' },
-    });
+    const [projects, usage] = await Promise.all([
+        db.project.findMany({
+            where: { userId: session.user.id },
+            orderBy: { createdAt: 'desc' },
+        }),
+        getSubscriptionUsage(session.user.id),
+    ]);
 
     return (
         <main className="max-w-6xl mx-auto p-8 space-y-8">
             {/* Top Navigation Bar */}
-            <div className="flex items-center justify-between border-b border-border pb-4">
-                <Link
-                    href="/dashboard"
-                    className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-ink transition-colors"
-                >
-                    <ArrowLeft className="size-3.5" />
-                    <span>Dashboard</span>
-                </Link>
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+                <div className="flex items-center gap-4">
+                    <Link
+                        href="/dashboard"
+                        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-ink transition-colors"
+                    >
+                        <ArrowLeft className="size-3.5" />
+                        <span>Dashboard</span>
+                    </Link>
+                    <Link
+                        href="/dashboard/billing"
+                        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-ink transition-colors"
+                    >
+                        <CreditCard className="size-3.5" />
+                        <span>Billing</span>
+                    </Link>
+                </div>
+
                 <div className="flex items-center gap-3">
                     <CommandTrigger />
                     {/* <ThemeToggle /> */}
-                </div>
 
-                <UpgradeButton />
+                    {/* Subscription Status & Quota Indicator */}
+                    {usage.isPro ? (
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href="/dashboard/billing"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium bg-accent-muted text-accent-foreground border border-accent/20 hover:opacity-90 transition-opacity"
+                            >
+                                <Sparkles className="size-3" />
+                                <span>Pro Plan</span>
+                                <span className="text-[10px] opacity-75 font-mono">(Unlimited)</span>
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href="/dashboard/billing"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs border border-border bg-paper hover:bg-muted/50 transition-colors"
+                                title="Click to view billing details"
+                            >
+                                <span className="font-mono text-muted-foreground">
+                                    {usage.projectCount}/3 projects
+                                </span>
+                                {usage.canCreateMore ? (
+                                    <span className="text-accent font-medium font-mono text-[11px]">
+                                        ({usage.projectsRemaining} left)
+                                    </span>
+                                ) : (
+                                    <span className="text-attention font-medium text-[11px]">
+                                        (Limit reached)
+                                    </span>
+                                )}
+                            </Link>
+
+                            <UpgradeButton size="sm" label="Upgrade to Pro" />
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                     <h1 className="text-xl font-semibold">Projects</h1>
-                    <p className="text-sm text-muted">
-                        Manage your projects, workspaces, and task boards.
+                    <p className="text-sm text-muted-foreground">
+                        {usage.isPro
+                            ? 'Manage your projects, workspaces, and task boards. (Unlimited projects enabled)'
+                            : `Manage your projects and workspaces. You have used ${usage.projectCount} of 3 free project slots (${usage.projectsRemaining} remaining).`}
                     </p>
                 </div>
-                <NewProjectDialog triggerText="New Project" />
+                <NewProjectDialog
+                    triggerText="New Project"
+                    canCreateMore={usage.canCreateMore}
+                    projectsRemaining={usage.projectsRemaining}
+                    isPro={usage.isPro}
+                />
             </div>
 
             {/* Projects Grid / Empty State */}
@@ -65,7 +121,13 @@ export default async function ProjectsIndexPage() {
                             Projects help you organize tasks, track status, and manage deliverables.
                         </p>
                     </div>
-                    <NewProjectDialog triggerText="Create your first project" size="default" />
+                    <NewProjectDialog
+                        triggerText="Create your first project"
+                        size="default"
+                        canCreateMore={usage.canCreateMore}
+                        projectsRemaining={usage.projectsRemaining}
+                        isPro={usage.isPro}
+                    />
                 </div>
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -83,10 +145,10 @@ export default async function ProjectsIndexPage() {
                             </div>
 
                             <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xs">
-                                <span className="font-mono text-muted group-hover:text-ink transition-colors">
+                                <span className="font-mono text-muted-foreground group-hover:text-ink transition-colors">
                                     /{project.slug}
                                 </span>
-                                <span className="inline-flex items-center gap-0.5 text-muted group-hover:text-ink transition-colors">
+                                <span className="inline-flex items-center gap-0.5 text-muted-foreground group-hover:text-ink transition-colors">
                                     <span>View tasks</span>
                                     <ArrowUpRight className="size-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                                 </span>
@@ -101,6 +163,9 @@ export default async function ProjectsIndexPage() {
                             variant="ghost"
                             size="sm"
                             className="w-full h-full"
+                            canCreateMore={usage.canCreateMore}
+                            projectsRemaining={usage.projectsRemaining}
+                            isPro={usage.isPro}
                         />
                     </div>
                 </div>
